@@ -3,12 +3,14 @@ on: [push]
 jobs:
   build:
     runs-on: macos-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Zgjidh paralajmërimin e Node.js
     steps:
       - uses: actions/checkout@v4
       
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.9'  # Ndryshuar nga 3.16.0 në 3.16.9
+          flutter-version: '3.16.9'
           channel: 'stable'
       
       - name: Install dependencies
@@ -25,12 +27,18 @@ jobs:
       - name: Create IPA
         run: |
           mkdir -p build/ios/ipa
-          cd build/ios/iphoneos
-          mkdir -p Payload
-          cp -r Runner.app Payload/
-          zip -r ../ipa/WarthogWallet.ipa Payload
-          cd ../..
-          ls -la ipa/
+          if [ -d "build/ios/iphoneos/Runner.app" ]; then
+            cd build/ios/iphoneos
+            mkdir -p Payload
+            cp -r Runner.app Payload/
+            zip -r ../ipa/WarthogWallet.ipa Payload
+            cd ../..
+            echo "✅ IPA created successfully!"
+            ls -la build/ios/ipa/
+          else
+            echo "❌ Runner.app not found!"
+            exit 1
+          fi
       
       - name: Upload IPA
         uses: actions/upload-artifact@v4
