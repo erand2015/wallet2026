@@ -1,0 +1,57 @@
+name: warthog_flutter_wallet
+description: A Warthog cryptocurrency wallet for iOS
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_local_notifications: ^16.3.0  # Për notifikime lokale [citation:2]
+  timezone: ^0.9.4 # Për menaxhimin e kohës
+  permission_handler: ^11.0.0  # Për kërkim lejesh
+  # BIP39 për 12/24 fjalët
+  bip39: ^1.0.6
+  
+  # BIP32 për derivation paths
+  bip32: ^2.0.0
+  
+  # secp256k1 për nënshkrime
+  pointycastle: ^3.7.3
+  
+  # SHA dhe RIPEMD
+  crypto: ^3.0.3
+  convert: ^3.1.1
+  hex: ^0.2.0
+  
+  # 64-bit integers
+  fixnum: ^1.0.1
+  
+  # HTTP
+  http: ^1.6.0
+  
+  # Secure Storage
+  flutter_secure_storage: ^10.0.0
+  file_picker: ^10.3.10 
+  share_plus: ^12.0.1 
+  path_provider: ^2.1.5
+  
+  # UI
+  provider: ^6.1.5+1
+  qr_flutter: ^4.1.0
+  intl: ^0.20.2
+  encrypt: ^5.0.3
+  local_auth: ^2.3.0
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
