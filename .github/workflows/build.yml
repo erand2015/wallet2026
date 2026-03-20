@@ -3,33 +3,25 @@ on: [push]
 jobs:
   build:
     runs-on: macos-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
       
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.9'
+          flutter-version: '3.22.0'
           channel: 'stable'
       
       - name: Install dependencies
         run: flutter pub get
       
-      - name: Verify Flutter setup
-        run: |
-          flutter doctor -v
-          flutter --version
-      
-      - name: Build iOS (with detailed logs)
+      - name: Build iOS
         run: |
           flutter build ios --release --no-codesign 2>&1 | tee build_log.txt
           cat build_log.txt
           if [ ! -d "build/ios/iphoneos/Runner.app" ]; then
-            echo "❌ ERROR: Runner.app not found!"
+            echo "❌ Runner.app not found!"
             exit 1
           fi
-        continue-on-error: false
       
       - name: Create IPA
         if: success()
@@ -40,7 +32,6 @@ jobs:
           cp -r Runner.app Payload/
           zip -r ../ipa/WarthogWallet.ipa Payload
           cd ../..
-          echo "✅ IPA created!"
           ls -la build/ios/ipa/
       
       - name: Upload IPA
