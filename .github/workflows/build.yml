@@ -1,46 +1,40 @@
-name: Build iOS IPA
-on: [push]
-jobs:
-  build:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
+workflows:
+  ios-build:
+    name: iOS Build
+    environment:
+      groups:
+        - App Store Connect
+      vars:
+        BUNDLE_ID: "com.erand2015.warthogwallet"
+        XCODE_WORKSPACE: "ios/Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+    scripts:
+      - name: Install Flutter dependencies
+        script: |
+          flutter pub get
       
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.22.0'
-          channel: 'stable'
+      - name: Install CocoaPods
+        script: |
+          cd ios
+          pod install
+          cd ..
       
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Build iOS (no codesign)
+        script: |
+          flutter build ios --release --no-codesign
       
-      - name: Create .ipa without signing (for Sideloadly)
-        run: |
-          echo "🔍 Building iOS app..."
-          flutter build ios --release --no-codesign 2>&1 | tee build_log.txt || true
-          
-          echo "🔍 Searching for Runner.app..."
-          RUNNER_PATH=$(find . -name "Runner.app" -type d | head -1)
-          
-          if [ -z "$RUNNER_PATH" ]; then
-            echo "❌ Runner.app not found!"
-            find . -name "*.app" -type d
-            exit 1
-          fi
-          
-          echo "✅ Found Runner.app at: $RUNNER_PATH"
-          
-          # Krijo IPA
+      - name: Create IPA
+        script: |
+          echo "🔍 Creating IPA..."
           mkdir -p Payload
-          cp -r "$RUNNER_PATH" Payload/
+          cp -r build/ios/iphoneos/Runner.app Payload/
           zip -r WarthogWallet.ipa Payload
-          
-          echo "✅ IPA created successfully!"
           ls -la WarthogWallet.ipa
-          file WarthogWallet.ipa
       
-      - name: Upload IPA
-        uses: actions/upload-artifact@v4
-        with:
-          name: WarthogWallet
-          path: WarthogWallet.ipa
+    artifacts:
+      - WarthogWallet.ipa
+    
+    publishing:
+      email:
+        recipients:
+          - erand2015@hotmail.com
