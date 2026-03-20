@@ -25,9 +25,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	
-	<!-- LEJET E REJA PËR FACE ID -->
-	<key>NSFaceIDUsageDescription</key>
-	<string>Warthog Wallet uses Face ID to securely access your wallet and protect your funds</string>
+	<!-- FACE ID E HEQUR PËR TË RIKTHYER BUILD-IN -->
+	<!-- <key>NSFaceIDUsageDescription</key> -->
+	<!-- <string>Warthog Wallet uses Face ID to securely access your wallet and protect your funds</string> -->
 	
 	<!-- LEJET PËR RRJETIN (HTTP) -->
 	<key>NSAppTransportSecurity</key>
