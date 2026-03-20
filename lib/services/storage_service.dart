@@ -5,10 +5,9 @@ import '../models/wallet.dart';
 
 class StorageService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  
   static const String _walletKey = 'warthog_wallet';
 
-  // 1. RUAJ PORTOFOLIN
+  // RUAJ PORTOFOLIN
   Future<void> saveWallet(Wallet wallet) async {
     final walletJson = json.encode({
       'mnemonic': wallet.mnemonic,
@@ -19,39 +18,38 @@ class StorageService {
     });
     
     await _storage.write(key: _walletKey, value: walletJson);
+    print('✅ Wallet saved: ${wallet.address}');
   }
 
-  // 2. NGARKO PORTOFOLIN
+  // NGARKO PORTOFOLIN
   Future<Wallet?> loadWallet() async {
     final walletJson = await _storage.read(key: _walletKey);
     
     if (walletJson == null) {
+      print('ℹ️ No wallet found');
       return null;
     }
     
     try {
-      final Map<String, dynamic> jsonData = json.decode(walletJson); // NDRYSHIMI KËTU!
-      return Wallet(
+      final Map<String, dynamic> jsonData = json.decode(walletJson);
+      final wallet = Wallet(
         mnemonic: jsonData['mnemonic'] ?? '',
         privateKey: jsonData['privateKey'] ?? '',
         publicKey: jsonData['publicKey'] ?? '',
         address: jsonData['address'] ?? '',
         derivationPath: jsonData['derivationPath'] ?? '',
       );
+      print('✅ Wallet loaded: ${wallet.address}');
+      return wallet;
     } catch (e) {
-      print('Error loading wallet: $e');
+      print('❌ Error loading wallet: $e');
       return null;
     }
   }
 
-  // 3. FSHIJ PORTOFOLIN
+  // FSHIJ PORTOFOLIN
   Future<void> deleteWallet() async {
     await _storage.delete(key: _walletKey);
-  }
-
-  // 4. KONTROLLO NËSE KA PORTOFOL
-  Future<bool> hasWallet() async {
-    final wallet = await _storage.read(key: _walletKey);
-    return wallet != null;
+    print('🗑️ Wallet deleted');
   }
 }

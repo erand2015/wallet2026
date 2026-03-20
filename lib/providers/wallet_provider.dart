@@ -1,10 +1,12 @@
 // lib/providers/wallet_provider.dart
 import 'package:flutter/material.dart';
 import '../services/wallet_service.dart';
+import '../services/storage_service.dart';
 import '../models/wallet.dart';
 
 class WalletProvider extends ChangeNotifier {
   final WalletService _walletService = WalletService();
+  final StorageService _storageService = StorageService();
   
   Wallet? _wallet;
   double _balance = 0.0;
@@ -21,13 +23,13 @@ class WalletProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _wallet = await _walletService.loadWallet();
+      _wallet = await _storageService.loadWallet();
       if (_wallet != null) {
-        _balance = _wallet!.balance;
+        _balance = await _walletService.refreshBalance();
+        _wallet!.balance = _balance;
         _address = _wallet!.address;
-        print('✅ Portofoli u ngarkua me balancë: $_balance WART');
-        print('   Address: $_address');
-        print('   Private Key: ${_wallet!.privateKey.substring(0, 16)}...');
+        print('✅ Portofoli u ngarkua: $_address');
+        print('✅ Balanca: $_balance WART');
       } else {
         print('ℹ️ Nuk ka portofol të ruajtur');
       }
@@ -47,9 +49,12 @@ class WalletProvider extends ChangeNotifier {
       _wallet = await _walletService.createNewWallet(wordCount: wordCount);
       _balance = _wallet!.balance;
       _address = _wallet!.address;
-      print('✅ Portofoli i ri u krijua me balancë: $_balance WART');
-      print('   Address: $_address');
-      print('   Private Key: ${_wallet!.privateKey.substring(0, 16)}...');
+      
+      // Ruaj në storage
+      await _storageService.saveWallet(_wallet!);
+      
+      print('✅ Portofoli i ri u krijua: $_address');
+      print('✅ Balanca: $_balance WART');
     } catch (e) {
       print('❌ Error creating wallet: $e');
     } finally {
@@ -66,10 +71,13 @@ class WalletProvider extends ChangeNotifier {
       _wallet = await _walletService.importFromMnemonic(mnemonic);
       _balance = _wallet!.balance;
       _address = _wallet!.address;
-      print('✅ Portofoli i importuar me sukses!');
-      print('   Address: $_address');
-      print('   Private Key: ${_wallet!.privateKey.substring(0, 16)}...');
-      print('   Balance: $_balance WART');
+      
+      // Ruaj në storage
+      await _storageService.saveWallet(_wallet!);
+      
+      print('✅ Portofoli i importuar: $_address');
+      print('✅ Ruajtur në storage');
+      print('✅ Balanca: $_balance WART');
     } catch (e) {
       print('❌ Error importing wallet: $e');
     } finally {
@@ -80,7 +88,6 @@ class WalletProvider extends ChangeNotifier {
 
   Future<void> refreshBalance() async {
     if (_wallet == null) {
-      // Provo të ngarkosh nga storage
       await loadWallet();
       if (_wallet == null) return;
     }
@@ -101,7 +108,7 @@ class WalletProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _walletService.logout();
+    await _storageService.deleteWallet();
     _wallet = null;
     _balance = 0.0;
     _address = '';
