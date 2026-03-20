@@ -14,27 +14,35 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       
-      - name: Build iOS (verbose)
-        run: flutter build ios --release --no-codesign -v
-      
-      - name: List build output
-        run: |
-          echo "Contents of build/ios/iphoneos:"
-          ls -la build/ios/iphoneos/ || echo "Directory not found"
-          echo "Contents of build/ios:"
-          ls -la build/ios/ || echo "Directory not found"
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign
       
       - name: Create IPA
         run: |
-          mkdir -p build/ios/ipa
-          cd build/ios/iphoneos
-          mkdir -p Payload
-          cp -r Runner.app Payload/
-          zip -r ../ipa/WarthogWallet.ipa Payload
-          cd ../..
-          ls -la build/ios/ipa/
+          set -e
+          echo "Current directory: $(pwd)"
+          echo "Checking if Runner.app exists..."
+          if [ -d "build/ios/iphoneos/Runner.app" ]; then
+            echo "✅ Runner.app found at $(pwd)/build/ios/iphoneos/Runner.app"
+            mkdir -p build/ios/ipa
+            cd build/ios/iphoneos
+            mkdir -p Payload
+            cp -r Runner.app Payload/
+            zip -r ../ipa/WarthogWallet.ipa Payload
+            cd ../..
+            echo "✅ IPA created at $(pwd)/build/ios/ipa/WarthogWallet.ipa"
+            ls -la build/ios/ipa/
+          else
+            echo "❌ Runner.app not found!"
+            echo "Contents of build/ios/iphoneos:"
+            ls -la build/ios/iphoneos/ || echo "Directory not found"
+            echo "Contents of build/ios:"
+            ls -la build/ios/ || echo "Directory not found"
+            exit 1
+          fi
       
       - name: Upload IPA
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: WarthogWallet
