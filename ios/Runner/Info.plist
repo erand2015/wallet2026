@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Warthog Flutter Wallet</string>
+	<string>Warthog Wallet</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -24,6 +24,28 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	
+	<!-- LEJET E REJA PËR FACE ID -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>Warthog Wallet uses Face ID to securely access your wallet and protect your funds</string>
+	
+	<!-- LEJET PËR RRJETIN (HTTP) -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	
+	<!-- LEJET PËR NOTIFIKIME -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
+	
+	<!-- LEJET PËR KAMERË (PËR QR SCAN NË TË ARDHMEN) -->
+	<key>NSCameraUsageDescription</key>
+	<string>Warthog Wallet needs camera access to scan QR codes</string>
+	
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

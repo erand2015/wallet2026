@@ -64,17 +64,22 @@ class _MyAppState extends State<MyApp> {
       
       // Provo biometrinë nëse është e aktivizuar
       if (biometricEnabled) {
-        final authenticated = await _biometricService.authenticateWithBiometrics();
-        if (authenticated) {
-          setState(() {
-            _isAuthenticated = true;
-            _isLoading = false;
-          });
-          return;
+        try {
+          final authenticated = await _biometricService.authenticateWithBiometrics();
+          if (authenticated) {
+            setState(() {
+              _isAuthenticated = true;
+              _isLoading = false;
+            });
+            return;
+          }
+        } catch (e) {
+          print('Biometric auth error: $e');
+          // Vazhdo me PIN nëse biometria dështon
         }
       }
       
-      // Nëse biometria nuk funksionoi, kërko PIN
+      // Nëse biometria nuk funksionoi ose nuk është e aktivizuar, kërko PIN
       if (pinEnabled) {
         _showPinScreen();
       } else {
@@ -94,20 +99,31 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _showPinScreen() {
-    Navigator.push(
-      navigatorKey.currentContext!,
-      MaterialPageRoute(
-        builder: (_) => PinScreen(
-          isSetup: false,
-          onSuccess: () {
-            setState(() {
-              _isAuthenticated = true;
-            });
-            Navigator.pop(navigatorKey.currentContext!);
-          },
-        ),
-      ),
-    );
+    // Sigurohu që context-i është i disponueshëm
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (navigatorKey.currentContext != null) {
+        Navigator.push(
+          navigatorKey.currentContext!,
+          MaterialPageRoute(
+            builder: (_) => PinScreen(
+              isSetup: false,
+              onSuccess: () {
+                setState(() {
+                  _isAuthenticated = true;
+                });
+                Navigator.pop(navigatorKey.currentContext!);
+              },
+            ),
+          ),
+        );
+      } else {
+        // Fallback: kalojmë direkt nëse context-i nuk është gati
+        setState(() {
+          _isAuthenticated = true;
+          _isLoading = false;
+        });
+      }
+    });
   }
 
   @override
@@ -129,7 +145,23 @@ class _MyAppState extends State<MyApp> {
       return const MaterialApp(
         home: Scaffold(
           backgroundColor: Color(0xFF000000),
-          body: SizedBox.shrink(),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.lock,
+                  color: WarthogColors.primaryOrange,
+                  size: 48,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Authentication required',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
         ),
       );
     }
