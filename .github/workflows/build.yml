@@ -4,7 +4,7 @@ jobs:
   build:
     runs-on: macos-latest
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Zgjidh paralajmërimin e Node.js
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
       
@@ -21,26 +21,30 @@ jobs:
           flutter doctor -v
           flutter --version
       
-      - name: Build iOS (no codesign)
-        run: flutter build ios --release --no-codesign
-      
-      - name: Create IPA
+      - name: Build iOS (with detailed logs)
         run: |
-          mkdir -p build/ios/ipa
-          if [ -d "build/ios/iphoneos/Runner.app" ]; then
-            cd build/ios/iphoneos
-            mkdir -p Payload
-            cp -r Runner.app Payload/
-            zip -r ../ipa/WarthogWallet.ipa Payload
-            cd ../..
-            echo "✅ IPA created successfully!"
-            ls -la build/ios/ipa/
-          else
-            echo "❌ Runner.app not found!"
+          flutter build ios --release --no-codesign 2>&1 | tee build_log.txt
+          cat build_log.txt
+          if [ ! -d "build/ios/iphoneos/Runner.app" ]; then
+            echo "❌ ERROR: Runner.app not found!"
             exit 1
           fi
+        continue-on-error: false
+      
+      - name: Create IPA
+        if: success()
+        run: |
+          mkdir -p build/ios/ipa
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r ../ipa/WarthogWallet.ipa Payload
+          cd ../..
+          echo "✅ IPA created!"
+          ls -la build/ios/ipa/
       
       - name: Upload IPA
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: WarthogWallet
