@@ -201,13 +201,13 @@ class _SendScreenState extends State<SendScreen> {
             
             const SizedBox(height: 16),
             
-            // Amount with MAX button
+            // Amount with MAX button - TANI ME DECIMAL KEYBOARD!
             Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _amountController,
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     style: const TextStyle(color: Colors.white),
                     onChanged: (value) => _calculateRemaining(),
                     decoration: InputDecoration(
@@ -269,7 +269,7 @@ class _SendScreenState extends State<SendScreen> {
             
             const SizedBox(height: 16),
             
-            // Fee
+            // Fee - TANI ME DECIMAL KEYBOARD!
             const Text(
               'Network Fee',
               style: TextStyle(
@@ -281,7 +281,7 @@ class _SendScreenState extends State<SendScreen> {
             const SizedBox(height: 8),
             TextField(
               controller: _feeController,
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               style: const TextStyle(color: Colors.white),
               onChanged: (value) {
                 _calculateRemaining();
