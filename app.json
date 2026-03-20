@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "Warthog Wallet",
+    "slug": "warthog-wallet",
+    "version": "1.0.0",
+    "platforms": ["ios", "android"],
+    "ios": {
+      "bundleIdentifier": "com.erand2015.warthogwallet"
+    }
+  }
+}

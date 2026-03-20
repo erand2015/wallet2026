@@ -14,41 +14,30 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       
-      - name: Build iOS (ignore signing errors)
+      - name: Create .ipa without signing (for Sideloadly)
         run: |
-          flutter build ios --release --no-codesign 2>&1 | tee build_log.txt
-          # Kontrollo nëse Runner.app u krijua pavarësisht gabimeve
-          if [ -d "build/ios/iphoneos/Runner.app" ] || [ -d "build/ios/Release-iphoneos/Runner.app" ]; then
-            echo "✅ Build succeeded - Runner.app found"
-          else
-            echo "❌ Build failed - Runner.app not found"
-            exit 1
-          fi
-      
-      - name: Find and create IPA
-        run: |
-          echo "🔍 Finding Runner.app..."
+          echo "🔍 Building iOS app..."
+          flutter build ios --release --no-codesign 2>&1 | tee build_log.txt || true
           
-          # Gjej Runner.app
-          if [ -d "build/ios/iphoneos/Runner.app" ]; then
-            cp -r build/ios/iphoneos/Runner.app .
-          elif [ -d "build/ios/Release-iphoneos/Runner.app" ]; then
-            cp -r build/ios/Release-iphoneos/Runner.app .
-          else
+          echo "🔍 Searching for Runner.app..."
+          RUNNER_PATH=$(find . -name "Runner.app" -type d | head -1)
+          
+          if [ -z "$RUNNER_PATH" ]; then
             echo "❌ Runner.app not found!"
-            find . -name "Runner.app" -type d
+            find . -name "*.app" -type d
             exit 1
           fi
           
-          echo "✅ Runner.app found"
+          echo "✅ Found Runner.app at: $RUNNER_PATH"
           
           # Krijo IPA
           mkdir -p Payload
-          mv Runner.app Payload/
+          cp -r "$RUNNER_PATH" Payload/
           zip -r WarthogWallet.ipa Payload
           
-          echo "✅ IPA created"
+          echo "✅ IPA created successfully!"
           ls -la WarthogWallet.ipa
+          file WarthogWallet.ipa
       
       - name: Upload IPA
         uses: actions/upload-artifact@v4
