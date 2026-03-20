@@ -17,38 +17,29 @@ jobs:
       - name: Build iOS
         run: flutter build ios --release --no-codesign
       
-      - name: Create IPA
+      - name: Find and upload IPA
         run: |
-          set -e
-          echo "Current directory: $(pwd)"
+          echo "🔍 Searching for .ipa file..."
           
-          # Kërko Runner.app në vendet e mundshme
-          if [ -d "build/ios/iphoneos/Runner.app" ]; then
-            RUNNER_PATH="build/ios/iphoneos"
-          elif [ -d "build/build/ios/iphoneos/Runner.app" ]; then
-            RUNNER_PATH="build/build/ios/iphoneos"
-          else
-            echo "❌ Runner.app not found!"
-            find . -name "Runner.app" -type d 2>/dev/null || echo "Not found"
+          # Gjej çdo skedar .ipa
+          IPA_FILE=$(find . -name "*.ipa" -type f | head -1)
+          
+          if [ -z "$IPA_FILE" ]; then
+            echo "❌ No .ipa file found!"
+            echo "Searching for Runner.app instead..."
+            find . -name "Runner.app" -type d
             exit 1
           fi
           
-          echo "✅ Runner.app found at $RUNNER_PATH"
+          echo "✅ Found IPA at: $IPA_FILE"
           
-          # Krijo IPA në vendin e duhur
-          mkdir -p build/ios/ipa
-          cd $RUNNER_PATH
-          mkdir -p Payload
-          cp -r Runner.app Payload/
-          zip -r ../../ios/ipa/WarthogWallet.ipa Payload
-          cd ../../..
-          
-          echo "✅ IPA created at $(pwd)/build/ios/ipa/WarthogWallet.ipa"
-          ls -la build/ios/ipa/
+          # Kopjo IPA në vendin e pritur nga upload
+          mkdir -p ipa_output
+          cp "$IPA_FILE" ipa_output/
+          ls -la ipa_output/
       
       - name: Upload IPA
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: WarthogWallet
-          path: build/ios/ipa/*.ipa
+          path: ipa_output/*.ipa
