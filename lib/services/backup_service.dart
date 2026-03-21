@@ -19,7 +19,7 @@ class BackupService {
 
   final _secureStorage = const FlutterSecureStorage();
   final _storageService = StorageService();
-  
+
   // Prefiksi për skedarët e backup
   static const String _backupPrefix = 'warthog_backup_';
   static const String _backupExtension = 'wbe'; // Warthog Backup Encrypted
@@ -46,33 +46,32 @@ class BackupService {
 
       // Konverto në JSON
       final jsonString = jsonEncode(backupData);
-      
+
       // Gjenero IV (Initialization Vector) të rastit
       final iv = encrypt.IV.fromSecureRandom(16);
-      
+
       // Krijo çelësin nga fjalëkalimi (AES-256 kërkon 32 bytes)
       final key = _deriveKeyFromPassword(password);
-      
+
       // Krijo enkriptuesin
       final encrypter = encrypt.Encrypter(encrypt.AES(key));
-      
+
       // Enkripto të dhënat
       final encrypted = encrypter.encrypt(jsonString, iv: iv);
-      
+
       // Ruaj IV dhe të dhënat e enkriptuara së bashku
       final backupPackage = {
         'iv': iv.base64,
         'data': encrypted.base64,
         'version': '2.0',
       };
-      
+
       // Konverto në JSON dhe pastaj në base64 për ruajtje
       final packageJson = jsonEncode(backupPackage);
       final finalBackup = base64Encode(utf8.encode(packageJson));
-      
+
       print('✅ Backup i kriptuar u krijua me sukses');
       return finalBackup;
-      
     } catch (e) {
       debugPrint('Error creating encrypted backup: $e');
       return null;
@@ -80,36 +79,37 @@ class BackupService {
   }
 
   // Rikthen portofolin nga backup i kriptuar
-  Future<bool> restoreEncryptedBackup(String encryptedData, String password) async {
+  Future<bool> restoreEncryptedBackup(
+      String encryptedData, String password) async {
     try {
       // Dekodo base64
       final packageJson = utf8.decode(base64Decode(encryptedData));
       final backupPackage = jsonDecode(packageJson);
-      
+
       // Verifiko versionin
       if (backupPackage['version'] != '2.0') {
         throw Exception('Unsupported backup version');
       }
-      
+
       // Merr IV dhe të dhënat e enkriptuara
       final iv = encrypt.IV.fromBase64(backupPackage['iv']);
       final encryptedBase64 = backupPackage['data'];
-      
+
       // Krijo çelësin nga fjalëkalimi
       final key = _deriveKeyFromPassword(password);
-      
+
       // Krijo enkriptuesin
       final encrypter = encrypt.Encrypter(encrypt.AES(key));
-      
+
       // Krijo objektin e të dhënave të enkriptuara
       final encrypted = encrypt.Encrypted.fromBase64(encryptedBase64);
-      
+
       // Dekripto
       final decryptedJson = encrypter.decrypt(encrypted, iv: iv);
-      
+
       // Parse JSON
       final backupData = jsonDecode(decryptedJson);
-      
+
       // Nxir të dhënat e portofolit
       final walletData = backupData['wallet'];
       final wallet = Wallet(
@@ -122,10 +122,9 @@ class BackupService {
 
       // Ruaj në secure storage
       await _storageService.saveWallet(wallet);
-      
+
       print('✅ Backup i rikthyer me sukses');
       return true;
-      
     } catch (e) {
       debugPrint('Error restoring encrypted backup: $e');
       return false;
@@ -138,11 +137,10 @@ class BackupService {
     if (password.length < 8) {
       throw Exception('Password must be at least 8 characters');
     }
-    
+
     // Për AES-256, na duhet një çelës 32 bytes
-    // Përdorim PBKDF2 ose thjesht hash SHA-256
     final bytes = utf8.encode(password);
-    
+
     // Nëse password-i është më i shkurtër se 32 bytes, e mbushim
     if (bytes.length < 32) {
       final padded = List<int>.filled(32, 0);
@@ -150,15 +148,16 @@ class BackupService {
         padded[i] = bytes[i];
       }
       return encrypt.Key(Uint8List.fromList(padded));
-    } 
+    }
     // Nëse është më i gjatë, presim në 32 bytes
     else {
       return encrypt.Key(Uint8List.fromList(bytes.sublist(0, 32)));
     }
   }
 
-  // Ruaj backup të kriptuar në skedar
-  Future<void> saveEncryptedBackupToFile(BuildContext context, String password) async {
+  // Ruaj backup të kriptuar në skedar - VERSIONI I PËRDITËSUAR
+  Future<void> saveEncryptedBackupToFile(
+      BuildContext context, String password) async {
     try {
       // Krijo backup të kriptuar
       final backupData = await createEncryptedBackup(password);
@@ -169,24 +168,60 @@ class BackupService {
         return;
       }
 
-      // Krijo skedar të përkohshëm
-      final tempDir = await getTemporaryDirectory();
+      // Përcakto dosjen e ruajtjes sipas platformës
+      Directory? saveDir;
+
+      if (Platform.isIOS) {
+        // Për iOS: Documents folder (i dukshëm në Files app)
+        saveDir = await getApplicationDocumentsDirectory();
+        print('📁 iOS backup path: ${saveDir.path}');
+      } else if (Platform.isAndroid) {
+        // Për Android: Download folder
+        saveDir = Directory('/storage/emulated/0/Download');
+        if (!await saveDir.exists()) {
+          saveDir = await getExternalStorageDirectory();
+        }
+        print('📁 Android backup path: ${saveDir?.path}');
+      } else {
+        saveDir = await getTemporaryDirectory();
+      }
+
+      // Sigurohu që dosja ekziston
+      if (saveDir == null) {
+        throw Exception('Could not determine save directory');
+      }
+
+      if (!await saveDir.exists()) {
+        await saveDir.create(recursive: true);
+      }
+
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = '${_backupPrefix}$timestamp.$_backupExtension';
-      final filePath = '${tempDir.path}/$fileName';
+      final filePath = '${saveDir.path}/$fileName';
       final file = File(filePath);
       await file.writeAsString(backupData);
 
-      // Shpërndaje skedarin
-      await Share.shareXFiles(
-        [XFile(filePath)],
-        text: 'Warthog Wallet Encrypted Backup',
+      print('✅ Backup saved: $filePath');
+
+      // Trego mesazh suksesi
+      String location = Platform.isIOS ? 'Documents' : 'Downloads';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Backup saved to $location folder'),
+          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.green,
+        ),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ Encrypted backup saved!')),
-      );
-      
+      // Shpërndaje skedarin (opsionale)
+      try {
+        await Share.shareXFiles(
+          [XFile(filePath)],
+          text: 'Warthog Wallet Encrypted Backup - Keep this file safe!',
+        );
+      } catch (e) {
+        print('Share error (optional): $e');
+      }
     } catch (e) {
       debugPrint('Error saving backup: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -196,7 +231,8 @@ class BackupService {
   }
 
   // Ngarko backup të kriptuar nga skedar
-  Future<void> loadEncryptedBackupFromFile(BuildContext context, String password) async {
+  Future<void> loadEncryptedBackupFromFile(
+      BuildContext context, String password) async {
     try {
       // Zgjidh skedarin
       final result = await FilePicker.platform.pickFiles(
@@ -217,17 +253,18 @@ class BackupService {
 
       // Rikthe portofolin
       final success = await restoreEncryptedBackup(backupData, password);
-      
+
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('✅ Wallet restored successfully!')),
         );
-        
+
         // Kthehu në home
         Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('❌ Failed to restore wallet - wrong password?')),
+          const SnackBar(
+              content: Text('❌ Failed to restore wallet - wrong password?')),
         );
       }
     } catch (e) {
@@ -238,9 +275,8 @@ class BackupService {
     }
   }
 
-  // Shfaq seed phrase (pa ndryshime)
+  // Shfaq seed phrase
   Future<void> showSeedPhrase(BuildContext context) async {
-    // ... kodi ekzistues (i njëjtë si më parë)
     try {
       final walletData = await _storageService.loadWallet();
       if (walletData == null) {
@@ -251,7 +287,7 @@ class BackupService {
       }
 
       final words = walletData.mnemonic.split(' ');
-      
+
       showDialog(
         context: context,
         builder: (context) => Dialog(
@@ -292,9 +328,7 @@ class BackupService {
                     ),
                   ],
                 ),
-                
                 const SizedBox(height: 20),
-                
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -307,7 +341,8 @@ class BackupService {
                   child: GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 3,
                       crossAxisSpacing: 8,
@@ -354,9 +389,7 @@ class BackupService {
                     },
                   ),
                 ),
-                
                 const SizedBox(height: 20),
-                
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -387,17 +420,14 @@ class BackupService {
                     ],
                   ),
                 ),
-                
                 const SizedBox(height: 20),
-                
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          Clipboard.setData(ClipboardData(
-                            text: walletData.mnemonic
-                          ));
+                          Clipboard.setData(
+                              ClipboardData(text: walletData.mnemonic));
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -427,9 +457,7 @@ class BackupService {
                         ),
                       ),
                     ),
-                    
                     const SizedBox(width: 12),
-                    
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () => Navigator.pop(context),
@@ -464,7 +492,9 @@ class BackupService {
     try {
       final packageJson = utf8.decode(base64Decode(backupData));
       final data = jsonDecode(packageJson);
-      return data['version'] == '2.0' && data.containsKey('iv') && data.containsKey('data');
+      return data['version'] == '2.0' &&
+          data.containsKey('iv') &&
+          data.containsKey('data');
     } catch (e) {
       return false;
     }

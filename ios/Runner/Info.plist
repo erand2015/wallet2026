@@ -45,5 +45,50 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- ========== BACKUP & FILE PERMISSIONS ========== -->
+	<!-- Enable file sharing for backup files -->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	
+	<!-- Document browser support -->
+	<key>UISupportsDocumentBrowser</key>
+	<true/>
+	
+	<!-- Photo library access for backup files -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Warthog Wallet needs access to save encrypted backup files</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Warthog Wallet needs access to read encrypted backup files</string>
+	
+	<!-- ========== BIOMETRIC AUTHENTICATION ========== -->
+	<!-- Face ID / Touch ID permission -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>Warthog Wallet uses Face ID to securely unlock your wallet</string>
+	
+	<!-- ========== NOTIFICATIONS ========== -->
+	<!-- Push notifications -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
+	
+	<!-- ========== CAMERA FOR QR CODE ========== -->
+	<!-- Camera permission for QR code scanning -->
+	<key>NSCameraUsageDescription</key>
+	<string>Warthog Wallet needs camera access to scan QR codes for sending and receiving WART</string>
+	
+	<!-- ========== NETWORK ========== -->
+	<!-- Allow HTTP connections (for development node) -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	
 </dict>
 </plist>
