@@ -1,25 +1,22 @@
 // lib/widgets/balance_card.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // IMPORT I RI!
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 import '../theme/theme.dart';
 
 class BalanceCard extends StatelessWidget {
   final double balance;
   final String address;
   final bool isLoading;
+  final bool isPrivacyMode;
 
   const BalanceCard({
     super.key,
     required this.balance,
     required this.address,
     this.isLoading = false,
+    this.isPrivacyMode = false,
   });
-
-  String _formatAddress(String addr) {
-    if (addr.length < 16) return addr;
-    return '${addr.substring(0, 8)}...${addr.substring(addr.length - 8)}';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +27,7 @@ class BalanceCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF25C05), // Portokalli zyrtare
+          color: const Color(0xFFF25C05),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -68,7 +65,7 @@ class BalanceCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        formatter.format(balance),
+                        isPrivacyMode ? '******' : formatter.format(balance),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 32,
@@ -92,7 +89,7 @@ class BalanceCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 
                 Text(
-                  '\$${formatter.format(usdValue)} USD',
+                  isPrivacyMode ? '******' : '\$${formatter.format(usdValue)} USD',
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 16,
@@ -100,7 +97,6 @@ class BalanceCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 
-                // Pjesa e adresës me buton copy
                 Row(
                   children: [
                     Container(
@@ -118,7 +114,7 @@ class BalanceCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        _formatAddress(address),
+                        isPrivacyMode ? '••••••••' : _formatAddress(address),
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 14,
@@ -126,26 +122,28 @@ class BalanceCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // BUTONI COPY
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.copy, color: Colors.white70, size: 18),
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: address));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Address copied to clipboard!'),
-                              duration: Duration(seconds: 2),
-                              backgroundColor: Color(0xFFF25C05),
-                            ),
-                          );
-                        },
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: address));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Address copied!'),
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Color(0xFFF25C05),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.copy,
+                          color: Colors.white70,
+                          size: 16,
+                        ),
                       ),
                     ),
                   ],
@@ -156,5 +154,10 @@ class BalanceCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatAddress(String addr) {
+    if (addr.length < 16) return addr;
+    return '${addr.substring(0, 8)}...${addr.substring(addr.length - 8)}';
   }
 }

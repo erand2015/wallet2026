@@ -17,11 +17,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _isPrivacyMode = false;
+
   @override
   void initState() {
     super.initState();
-    // Ngarko transaksionet kur hapet ekrani
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final walletProvider = Provider.of<WalletProvider>(context, listen: false);
+      walletProvider.loadWallet();
+      
       final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
       transactionProvider.loadTransactions();
     });
@@ -32,7 +36,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final walletProvider = Provider.of<WalletProvider>(context);
     final notificationService = NotificationService();
     
-    // Nëse nuk ka portofol, shfaq ekranin e mirëseardhjes
     if (walletProvider.wallet == null) {
       return Scaffold(
         backgroundColor: const Color(0xFF000000),
@@ -144,7 +147,6 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     
-    // Nëse ka portofol, shfaq ekranin kryesor
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
       appBar: AppBar(
@@ -158,47 +160,21 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
-          // Notifikimet
-          StreamBuilder<bool>(
-            stream: notificationService.notificationStream,
-            initialData: false,
-            builder: (context, snapshot) {
-              final hasNewNotifications = snapshot.data ?? false;
-              return Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      hasNewNotifications 
-                          ? Icons.notifications_active 
-                          : Icons.notifications_outlined,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      notificationService.showNotificationHistory(context);
-                    },
-                  ),
-                  if (hasNewNotifications)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: WarthogColors.primaryOrange,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                ],
-              );
+          IconButton(
+            icon: Icon(
+              _isPrivacyMode ? Icons.visibility_off : Icons.visibility,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                _isPrivacyMode = !_isPrivacyMode;
+              });
             },
           ),
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: Colors.white),
+            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
             onPressed: () {
-              Navigator.pushNamed(context, '/settings');
+              notificationService.showNotificationHistory(context);
             },
           ),
         ],
@@ -216,6 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
               balance: walletProvider.balance,
               address: walletProvider.address,
               isLoading: walletProvider.isLoading,
+              isPrivacyMode: _isPrivacyMode,
             ),
             
             const SizedBox(height: 24),
@@ -224,7 +201,9 @@ class _HomeScreenState extends State<HomeScreen> {
             
             const SizedBox(height: 24),
             
-            const TransactionList(),
+            TransactionList(
+              isPrivacyMode: _isPrivacyMode,
+            ),
           ],
         ),
       ),
