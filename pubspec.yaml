@@ -47,7 +47,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
-  flutter_launcher_icons: ^0.13.0  # <-- Shto këtë
+  flutter_launcher_icons: ^0.13.0
 
 flutter:
   uses-material-design: true
@@ -59,7 +59,6 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/warthog_logo.png"
-  adaptive_icon_background: "#F25C05"  # Ngjyra portokalli e Warthog
-  adaptive_icon_foreground: "assets/icons/warthog_icon_foreground.png"  # Opsionale
+  image_path: "assets/images/warthog_logo.png"  # Ndrysho këtu
+  adaptive_icon_background: "#F25C05"
   remove_alpha_ios: true
