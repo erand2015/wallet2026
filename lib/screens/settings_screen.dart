@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/wallet_provider.dart';
+import '../providers/transaction_provider.dart';
 import '../services/backup_service.dart';
 import '../services/biometric_service.dart';
 import '../theme/theme.dart';
@@ -52,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           const SizedBox(height: 20),
-          
+
           // ========== WALLET SECTION ==========
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
@@ -83,14 +84,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(color: Colors.white),
             ),
             subtitle: SelectableText(
-              walletProvider.address.isNotEmpty 
-                  ? walletProvider.address 
+              walletProvider.address.isNotEmpty
+                  ? walletProvider.address
                   : 'No wallet loaded',
               style: const TextStyle(color: Colors.white70, fontSize: 12),
             ),
           ),
           const Divider(color: Color(0xFF2A2A2A), height: 1),
-          
+
           // Show Seed Phrase Button
           ListTile(
             leading: Container(
@@ -119,7 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           const Divider(color: Color(0xFF2A2A2A), height: 1),
-          
+
           // Logout Button
           ListTile(
             leading: Container(
@@ -143,13 +144,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(color: Colors.white70),
             ),
             onTap: () async {
+              // Shkyç portofolin
               await walletProvider.logout();
-              Navigator.popUntil(context, (route) => route.isFirst);
+
+              // Pastro transaksionet lokale
+              final transactionProvider =
+                  Provider.of<TransactionProvider>(context, listen: false);
+              await transactionProvider.clearTransactions();
+
+              // Kthehu te rruga kryesore dhe hiq të gjitha ekranet e mëparshme
+              if (mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/', (route) => false);
+              }
             },
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // ========== SECURITY SECTION ==========
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
@@ -162,7 +174,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-          
+
           // Biometric Authentication (Face ID / Touch ID)
           if (_biometricAvailable)
             ListTile(
@@ -191,7 +203,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (value) async {
                   if (value) {
                     // Kërko autentikim para aktivizimit
-                    final auth = await _biometricService.authenticateWithBiometrics();
+                    final auth =
+                        await _biometricService.authenticateWithBiometrics();
                     if (auth) {
                       await _biometricService.setBiometricEnabled(true);
                       setState(() {
@@ -218,7 +231,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 activeColor: WarthogColors.primaryOrange,
               ),
             ),
-          
+
           // PIN Code
           ListTile(
             leading: Container(
@@ -266,7 +279,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               _hasPin = true;
                             });
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('PIN set successfully')),
+                              const SnackBar(
+                                  content: Text('PIN set successfully')),
                             );
                           },
                         ),
@@ -279,9 +293,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const Divider(color: Color(0xFF2A2A2A), height: 1),
-          
+
           const SizedBox(height: 20),
-          
+
           // ========== BACKUP & RESTORE SECTION ==========
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
@@ -294,7 +308,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-          
+
           // Backup Button (Encrypted)
           ListTile(
             leading: Container(
@@ -320,7 +334,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => _showEncryptedBackupDialog(context),
           ),
           const Divider(color: Color(0xFF2A2A2A), height: 1),
-          
+
           // Restore Button (Encrypted)
           ListTile(
             leading: Container(
@@ -346,9 +360,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => _showEncryptedRestoreDialog(context),
           ),
           const Divider(color: Color(0xFF2A2A2A), height: 1),
-          
+
           const SizedBox(height: 20),
-          
+
           // ========== NETWORK SECTION ==========
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
@@ -384,9 +398,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const Divider(color: Color(0xFF2A2A2A), height: 1),
-          
+
           const SizedBox(height: 20),
-          
+
           // ========== ABOUT SECTION ==========
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
@@ -422,7 +436,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const Divider(color: Color(0xFF2A2A2A), height: 1),
-          
+
           const SizedBox(height: 20),
         ],
       ),
@@ -432,7 +446,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showEncryptedBackupDialog(BuildContext context) {
     final passwordController = TextEditingController();
     final confirmController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -508,21 +522,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onPressed: () async {
               final password = passwordController.text;
               final confirm = confirmController.text;
-              
+
               if (password.length < 8) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Password must be at least 8 characters')),
+                  const SnackBar(
+                      content: Text('Password must be at least 8 characters')),
                 );
                 return;
               }
-              
+
               if (password != confirm) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Passwords do not match')),
                 );
                 return;
               }
-              
+
               Navigator.pop(context);
               final backupService = BackupService();
               await backupService.saveEncryptedBackupToFile(context, password);
@@ -539,7 +554,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showEncryptedRestoreDialog(BuildContext context) {
     final passwordController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -580,7 +595,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 decoration: BoxDecoration(
                   color: WarthogColors.primaryYellow.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: WarthogColors.primaryYellow.withOpacity(0.3)),
+                  border: Border.all(
+                      color: WarthogColors.primaryYellow.withOpacity(0.3)),
                 ),
                 child: const Row(
                   children: [
@@ -624,7 +640,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               }
               Navigator.pop(context);
               final backupService = BackupService();
-              await backupService.loadEncryptedBackupFromFile(context, password);
+              await backupService.loadEncryptedBackupFromFile(
+                  context, password);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: WarthogColors.primaryOrange,
