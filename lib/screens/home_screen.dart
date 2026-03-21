@@ -36,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final walletProvider = Provider.of<WalletProvider>(context);
     final notificationService = NotificationService();
     
+    // Nëse nuk ka portofol, shfaq ekranin e mirëseardhjes me Create/Import
     if (walletProvider.wallet == null) {
       return Scaffold(
         backgroundColor: const Color(0xFF000000),
@@ -147,6 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     
+    // Nëse ka portofol, shfaq ekranin kryesor
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
       appBar: AppBar(

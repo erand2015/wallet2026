@@ -63,394 +63,408 @@ class _SendScreenState extends State<SendScreen> {
         title: const Text('Send WART'),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Balance Card
-            if (wallet != null)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A1A),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFFF25C05).withOpacity(0.3),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Available Balance:',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      '${wallet.balance.toStringAsFixed(8)} WART',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFF25C05),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A1A),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.orange.withOpacity(0.3),
-                  ),
-                ),
-                child: const Text(
-                  'No wallet loaded. Please import a wallet first.',
-                  style: TextStyle(color: Colors.orange),
-                ),
-              ),
-            
-            const SizedBox(height: 20),
-            
-            // Error Message
-            if (_errorMessage != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.withOpacity(0.3)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            
-            // Success Message
-            if (_successMessage != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.green.withOpacity(0.3)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.check_circle, color: Colors.green, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _successMessage!,
-                        style: const TextStyle(color: Colors.green),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            
-            const SizedBox(height: 20),
-            
-            // Recipient Address
-            const Text(
-              'Recipient Address',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _toController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Enter WART address (48 hex characters)',
-                hintStyle: TextStyle(color: Colors.grey.shade600),
-                filled: true,
-                fillColor: const Color(0xFF1A1A1A),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFFF25C05), width: 2),
-                ),
-              ),
-              maxLines: 2,
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Amount with MAX button
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _amountController,
-                    keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
-                    onChanged: (value) => _calculateRemaining(),
-                    decoration: InputDecoration(
-                      hintText: '0.00',
-                      hintStyle: TextStyle(color: Colors.grey.shade600),
-                      filled: true,
-                      fillColor: const Color(0xFF1A1A1A),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFF25C05), width: 2),
-                      ),
-                      suffixText: 'WART',
-                      suffixStyle: const TextStyle(color: Colors.white70),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Balance Card
+              if (wallet != null)
                 Container(
-                  width: 80,
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        WarthogColors.primaryOrange,
-                        WarthogColors.primaryYellow,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: _setMaxAmount,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'MAX',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Fee
-            const Text(
-              'Network Fee',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _feeController,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: Colors.white),
-              onChanged: (value) {
-                _calculateRemaining();
-                setState(() {});
-              },
-              decoration: InputDecoration(
-                hintText: '0.01',
-                hintStyle: TextStyle(color: Colors.grey.shade600),
-                filled: true,
-                fillColor: const Color(0xFF1A1A1A),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFFF25C05), width: 2),
-                ),
-                suffixText: 'WART',
-                suffixStyle: const TextStyle(color: Colors.white70),
-              ),
-            ),
-            const SizedBox(height: 4),
-            
-            // Minimum fee indicator
-            if (_minFee != null)
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: _isFeeValid() ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _isFeeValid() ? Icons.check_circle : Icons.info_outline,
-                      color: _isFeeValid() ? Colors.green : Colors.orange,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _isFeeValid() 
-                          ? '✓ Fee is valid (min: $_minFee WART)'
-                          : '⚠ Fee too low! Minimum: $_minFee WART',
-                        style: TextStyle(
-                          color: _isFeeValid() ? Colors.green : Colors.orange,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            
-            const SizedBox(height: 8),
-            
-            // Remaining balance
-            Consumer<WalletProvider>(
-              builder: (context, walletProvider, child) {
-                final wallet = walletProvider.wallet;
-                if (wallet == null) return const SizedBox.shrink();
-                
-                final amount = double.tryParse(_amountController.text) ?? 0;
-                final fee = double.tryParse(_feeController.text) ?? 0.01;
-                final total = amount + fee;
-                final remaining = wallet.balance - total;
-                
-                return Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: remaining < 0 
-                        ? Colors.red.withOpacity(0.1)
-                        : const Color(0xFF1A1A1A),
+                    color: const Color(0xFF1A1A1A),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: remaining < 0
-                          ? Colors.red.withOpacity(0.3)
-                          : Colors.grey.shade800,
+                      color: const Color(0xFFF25C05).withOpacity(0.3),
                     ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.account_balance_wallet,
-                            size: 16,
-                            color: remaining < 0
-                                ? Colors.red
-                                : WarthogColors.primaryYellow,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Remaining after transaction:',
-                            style: TextStyle(
-                              color: remaining < 0
-                                  ? Colors.red
-                                  : Colors.white70,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
+                      const Text(
+                        'Available Balance:',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       Text(
-                        '${remaining.toStringAsFixed(6)} WART',
-                        style: TextStyle(
-                          color: remaining < 0
-                              ? Colors.red
-                              : remaining < 0.1
-                                  ? WarthogColors.primaryYellow
-                                  : Colors.white,
+                        '${wallet.balance.toStringAsFixed(8)} WART',
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          color: Color(0xFFF25C05),
                         ),
                       ),
                     ],
                   ),
-                );
-              },
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Send Button
-            Container(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: (wallet == null || _isLoading || !_isFeeValid()) ? null : _sendTransaction,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF25C05),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A1A1A),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.orange.withOpacity(0.3),
+                    ),
+                  ),
+                  child: const Text(
+                    'No wallet loaded. Please import a wallet first.',
+                    style: TextStyle(color: Colors.orange),
                   ),
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              
+              const SizedBox(height: 20),
+              
+              // Error Message
+              if (_errorMessage != null)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(color: Colors.red),
                         ),
-                      )
-                    : const Text(
-                        'Send Transaction',
-                        style: TextStyle(fontSize: 16),
                       ),
+                    ],
+                  ),
+                ),
+              
+              // Success Message
+              if (_successMessage != null)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _successMessage!,
+                          style: const TextStyle(color: Colors.green),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              
+              const SizedBox(height: 20),
+              
+              // Recipient Address
+              const Text(
+                'Recipient Address',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            
-            const SizedBox(height: 12),
-            
-            // Cancel Button
-            TextButton(
-              onPressed: _isLoading ? null : () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white70,
+              const SizedBox(height: 8),
+              TextField(
+                controller: _toController,
+                style: const TextStyle(color: Colors.white),
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  hintText: 'Enter WART address (48 hex characters)',
+                  hintStyle: TextStyle(color: Colors.grey.shade600),
+                  filled: true,
+                  fillColor: const Color(0xFF1A1A1A),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFF25C05), width: 2),
+                  ),
+                ),
+                maxLines: 2,
               ),
-              child: const Text('Cancel'),
-            ),
-          ],
+              
+              const SizedBox(height: 16),
+              
+              // Amount with MAX button - DECIMAL KEYBOARD
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _amountController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: const TextStyle(color: Colors.white),
+                      textInputAction: TextInputAction.next,
+                      onChanged: (value) => _calculateRemaining(),
+                      onEditingComplete: () {
+                        FocusScope.of(context).nextFocus();
+                      },
+                      decoration: InputDecoration(
+                        hintText: '0.00',
+                        hintStyle: TextStyle(color: Colors.grey.shade600),
+                        filled: true,
+                        fillColor: const Color(0xFF1A1A1A),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFFF25C05), width: 2),
+                        ),
+                        suffixText: 'WART',
+                        suffixStyle: const TextStyle(color: Colors.white70),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 80,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          WarthogColors.primaryOrange,
+                          WarthogColors.primaryYellow,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _setMaxAmount,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'MAX',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Fee - DECIMAL KEYBOARD
+              const Text(
+                'Network Fee',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _feeController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(color: Colors.white),
+                textInputAction: TextInputAction.done,
+                onChanged: (value) {
+                  _calculateRemaining();
+                  setState(() {});
+                },
+                onEditingComplete: () {
+                  FocusScope.of(context).unfocus();
+                },
+                decoration: InputDecoration(
+                  hintText: '0.01',
+                  hintStyle: TextStyle(color: Colors.grey.shade600),
+                  filled: true,
+                  fillColor: const Color(0xFF1A1A1A),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFF25C05), width: 2),
+                  ),
+                  suffixText: 'WART',
+                  suffixStyle: const TextStyle(color: Colors.white70),
+                ),
+              ),
+              const SizedBox(height: 4),
+              
+              // Minimum fee indicator
+              if (_minFee != null)
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _isFeeValid() ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _isFeeValid() ? Icons.check_circle : Icons.info_outline,
+                        color: _isFeeValid() ? Colors.green : Colors.orange,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _isFeeValid() 
+                            ? '✓ Fee is valid (min: $_minFee WART)'
+                            : '⚠ Fee too low! Minimum: $_minFee WART',
+                          style: TextStyle(
+                            color: _isFeeValid() ? Colors.green : Colors.orange,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              
+              const SizedBox(height: 8),
+              
+              // Remaining balance
+              Consumer<WalletProvider>(
+                builder: (context, walletProvider, child) {
+                  final wallet = walletProvider.wallet;
+                  if (wallet == null) return const SizedBox.shrink();
+                  
+                  final amount = double.tryParse(_amountController.text) ?? 0;
+                  final fee = double.tryParse(_feeController.text) ?? 0.01;
+                  final total = amount + fee;
+                  final remaining = wallet.balance - total;
+                  
+                  return Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: remaining < 0 
+                          ? Colors.red.withOpacity(0.1)
+                          : const Color(0xFF1A1A1A),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: remaining < 0
+                            ? Colors.red.withOpacity(0.3)
+                            : Colors.grey.shade800,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.account_balance_wallet,
+                              size: 16,
+                              color: remaining < 0
+                                  ? Colors.red
+                                  : WarthogColors.primaryYellow,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Remaining after transaction:',
+                              style: TextStyle(
+                                color: remaining < 0
+                                    ? Colors.red
+                                    : Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          '${remaining.toStringAsFixed(6)} WART',
+                          style: TextStyle(
+                            color: remaining < 0
+                                ? Colors.red
+                                : remaining < 0.1
+                                    ? WarthogColors.primaryYellow
+                                    : Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Send Button
+              Container(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: (wallet == null || _isLoading || !_isFeeValid()) ? null : _sendTransaction,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF25C05),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Send Transaction',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                ),
+              ),
+              
+              const SizedBox(height: 12),
+              
+              // Cancel Button
+              TextButton(
+                onPressed: _isLoading ? null : () => Navigator.pop(context),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white70,
+                ),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -490,7 +504,6 @@ class _SendScreenState extends State<SendScreen> {
       _successMessage = null;
     });
     
-    // Validimi i adresës
     final toAddress = _toController.text.trim();
     if (toAddress.isEmpty || toAddress.length != 48 || !RegExp(r'^[0-9a-fA-F]{48}$').hasMatch(toAddress)) {
       setState(() {
@@ -500,7 +513,6 @@ class _SendScreenState extends State<SendScreen> {
       return;
     }
     
-    // Validimi i sasisë
     final amount = double.tryParse(_amountController.text);
     if (amount == null || amount <= 0) {
       setState(() {
@@ -510,7 +522,6 @@ class _SendScreenState extends State<SendScreen> {
       return;
     }
     
-    // Validimi i tarifës
     final fee = double.tryParse(_feeController.text) ?? 0.01;
     if (_minFee != null && fee < _minFee!) {
       setState(() {
@@ -534,7 +545,6 @@ class _SendScreenState extends State<SendScreen> {
           _successMessage = '✅ Transaction sent!\nTXID: ${txId.substring(0, 16)}...';
         });
         
-        // Ruaj transaksionin lokalisht
         try {
           final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
           final walletProvider = Provider.of<WalletProvider>(context, listen: false);
@@ -551,7 +561,6 @@ class _SendScreenState extends State<SendScreen> {
           
           await transactionProvider.addTransaction(newTx);
           
-          // Pas 30 sekondash, kontrollo dhe përditëso statusin
           Future.delayed(const Duration(seconds: 30), () async {
             try {
               await transactionProvider.updateTransactionStatus(txId, TransactionStatus.confirmed);
@@ -563,11 +572,9 @@ class _SendScreenState extends State<SendScreen> {
           print('Gabim gjatë ruajtjes së transaksionit: $e');
         }
         
-        // Rifresko balancën
         final walletProvider = Provider.of<WalletProvider>(context, listen: false);
         await walletProvider.refreshBalance();
         
-        // Kthehu pas 3 sekondash
         Future.delayed(const Duration(seconds: 3), () {
           if (mounted) Navigator.pop(context);
         });
