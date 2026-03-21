@@ -90,5 +90,43 @@
 		<true/>
 	</dict>
 	
+	<!-- ========== FILE TYPE DECLARATIONS FOR .wbe ========== -->
+	<!-- Register .wbe file type for backup files -->
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.warthog.wallet.backup</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>wbe</string>
+				</array>
+			</dict>
+			<key>UTTypeDescription</key>
+			<string>Warthog Wallet Encrypted Backup</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+		</dict>
+	</array>
+	
+	<!-- Document types for opening .wbe files -->
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Warthog Backup File</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.warthog.wallet.backup</string>
+			</array>
+		</dict>
+	</array>
+	
 </dict>
 </plist>
