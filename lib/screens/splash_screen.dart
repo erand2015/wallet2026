@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/wallet_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../theme/theme.dart';
-import 'home_screen.dart';
+import 'main_screen.dart';  // <- Ndrysho këtu nga home_screen në main_screen
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -38,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen>
     
     _animationController.forward();
     
-    // Ngarko të dhënat dhe kalo te HomeScreen
+    // Ngarko të dhënat dhe kalo te MainScreen
     _initializeApp();
   }
   
@@ -55,9 +55,10 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(seconds: 2));
     
     if (mounted) {
+      // Ndrysho këtu: shko te MainScreen, jo te HomeScreen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => const MainScreen()),
       );
     }
   }
