@@ -22,7 +22,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
   bool _isLoading = true;
   bool _isChartLoading = true;
   String? _errorMessage;
-  double _wartPrice = 0.15;
+  double _wartPrice = 0.092;
   int _selectedDays = 7;
 
   @override
@@ -339,6 +339,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
                                             'high_24h': _wartPrice * 1.05,
                                             'low_24h': _wartPrice * 0.95,
                                             'image': '',
+                                            'isWarthog': true,
                                           },
                                         ),
                                       ),
@@ -375,7 +376,6 @@ class _TrendingScreenState extends State<TrendingScreen> {
                       ),
                     ),
                     
-                    // Lista e coin-ve të tjerë
                     if (_errorMessage != null)
                       Center(
                         child: Column(
