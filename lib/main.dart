@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/wallet_provider.dart';
 import 'providers/transaction_provider.dart';
-import 'screens/main_screen.dart';
+import 'screens/splash_screen.dart';
+import 'screens/main_screen.dart'; // <- Kjo duhet të jetë MainScreen
 import 'screens/create_wallet_screen.dart';
 import 'screens/import_wallet_screen.dart';
 import 'screens/send_screen.dart';
@@ -18,10 +19,10 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupPointyCastle();
-  
+
   final notificationService = NotificationService();
   await notificationService.init();
-  
+
   runApp(const MyApp());
 }
 
@@ -42,9 +43,11 @@ class MyApp extends StatelessWidget {
         theme: WarthogTheme.lightTheme,
         darkTheme: WarthogTheme.darkTheme,
         themeMode: ThemeMode.dark,
-        initialRoute: '/',
+        initialRoute: '/splash',
         routes: {
-          '/': (context) => const MainScreen(),
+          '/splash': (context) => const SplashScreen(),
+          '/': (context) =>
+              const MainScreen(), // <- Kjo duhet të jetë MainScreen
           '/create': (context) => const CreateWalletScreen(),
           '/import': (context) => const ImportWalletScreen(),
           '/send': (context) => const SendScreen(),

@@ -16,7 +16,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
-  
+
   final List<Widget> _screens = [
     const HomeScreen(),
     const TrendingScreen(),
@@ -27,60 +27,62 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final walletProvider = Provider.of<WalletProvider>(context);
     final hasWallet = walletProvider.wallet != null;
-    
+
+    // Nëse nuk ka portofol, trego vetëm HomeScreen (Create/Import)
+    if (!hasWallet) {
+      return const HomeScreen();
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
       body: _screens[_currentIndex],
-      // Bottom navigation shfaqet VETËM nëse ka portofol
-      bottomNavigationBar: hasWallet
-          ? Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: Colors.grey.shade800,
-                    width: 0.5,
-                  ),
-                ),
-              ),
-              child: BottomNavigationBar(
-                currentIndex: _currentIndex,
-                onTap: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
-                backgroundColor: const Color(0xFF1A1A1A),
-                selectedItemColor: WarthogColors.primaryOrange,
-                unselectedItemColor: Colors.grey.shade500,
-                selectedLabelStyle: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
-                unselectedLabelStyle: const TextStyle(
-                  fontSize: 12,
-                ),
-                type: BottomNavigationBarType.fixed,
-                elevation: 0,
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.home_outlined),
-                    activeIcon: Icon(Icons.home),
-                    label: 'Home',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.trending_up_outlined),
-                    activeIcon: Icon(Icons.trending_up),
-                    label: 'Trending',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.settings_outlined),
-                    activeIcon: Icon(Icons.settings),
-                    label: 'Settings',
-                  ),
-                ],
-              ),
-            )
-          : null,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: Colors.grey.shade800,
+              width: 0.5,
+            ),
+          ),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          backgroundColor: const Color(0xFF1A1A1A),
+          selectedItemColor: WarthogColors.primaryOrange,
+          unselectedItemColor: Colors.grey.shade500,
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 12,
+          ),
+          type: BottomNavigationBarType.fixed,
+          elevation: 0,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.trending_up_outlined),
+              activeIcon: Icon(Icons.trending_up),
+              label: 'Trending',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings_outlined),
+              activeIcon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

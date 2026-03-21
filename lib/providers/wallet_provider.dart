@@ -16,9 +16,11 @@ class WalletProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String get address => _address;
 
-  Future<void> loadWallet() async {
-    _isLoading = true;
-    notifyListeners();
+  Future<void> loadWallet({bool notify = true}) async {
+    if (notify) {
+      _isLoading = true;
+      notifyListeners();
+    }
 
     try {
       _wallet = await _walletService.loadWallet();
@@ -27,15 +29,19 @@ class WalletProvider extends ChangeNotifier {
         _address = _wallet!.address;
         print('✅ Portofoli u ngarkua me balancë: $_balance WART');
         print('   Address: $_address');
-        print('   Private Key: ${_wallet!.privateKey.substring(0, 16)}...');
+        if (_wallet!.privateKey.isNotEmpty) {
+          print('   Private Key: ${_wallet!.privateKey.substring(0, 16)}...');
+        }
       } else {
         print('ℹ️ Nuk ka portofol të ruajtur');
       }
     } catch (e) {
       print('❌ Error loading wallet: $e');
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (notify) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -80,8 +86,7 @@ class WalletProvider extends ChangeNotifier {
 
   Future<void> refreshBalance() async {
     if (_wallet == null) {
-      // Provo të ngarkosh nga storage
-      await loadWallet();
+      await loadWallet(notify: false);
       if (_wallet == null) return;
     }
 
@@ -90,7 +95,9 @@ class WalletProvider extends ChangeNotifier {
 
     try {
       _balance = await _walletService.refreshBalance();
-      _wallet!.balance = _balance;
+      if (_wallet != null) {
+        _wallet!.balance = _balance;
+      }
       print('🔄 Balanca e rifreskuar: $_balance WART');
     } catch (e) {
       print('❌ Error refreshing balance: $e');
