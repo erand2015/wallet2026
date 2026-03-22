@@ -1,4 +1,4 @@
-// lib/screens/main_screen.dart
+// lib/screens/main_screen.dart - Version pa appBar
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'home_screen.dart';
@@ -34,14 +34,6 @@ class _MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        toolbarHeight: 40,  // <- Lartësi më e vogël
-        title: const SizedBox.shrink(),
-        centerTitle: true,
-      ),
       body: _screens[_currentIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
