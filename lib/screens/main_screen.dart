@@ -28,7 +28,6 @@ class _MainScreenState extends State<MainScreen> {
     final walletProvider = Provider.of<WalletProvider>(context);
     final hasWallet = walletProvider.wallet != null;
 
-    // Nëse nuk ka portofol, trego vetëm HomeScreen (Create/Import)
     if (!hasWallet) {
       return const HomeScreen();
     }
@@ -39,6 +38,7 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: const Color(0xFF1A1A1A),
         elevation: 0,
         automaticallyImplyLeading: false,
+        toolbarHeight: 40,  // <- Lartësi më e vogël
         title: const SizedBox.shrink(),
         centerTitle: true,
       ),
