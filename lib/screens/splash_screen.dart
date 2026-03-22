@@ -40,31 +40,36 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
-      body: const Center(
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('🐗', style: TextStyle(fontSize: 100)),
-            SizedBox(height: 20),
-            Text(
+            // Logo nga assets
+            Image.asset(
+              'assets/images/warthog_logo.png',
+              width: 120,
+              height: 120,
+            ),
+            const SizedBox(height: 20),
+            const Text(
               'WARTHOG',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 28,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 2,
               ),
             ),
-            Text(
+            const Text(
               'WALLET',
               style: TextStyle(
                 color: Color(0xFFF25C05),
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            SizedBox(height: 40),
-            CircularProgressIndicator(
+            const SizedBox(height: 40),
+            const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF25C05)),
             ),
           ],
