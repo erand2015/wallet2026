@@ -108,116 +108,449 @@ class _SendScreenState extends State<SendScreen> with SingleTickerProviderStateM
     final amount = double.tryParse(_amountController.text) ?? 0;
     final fee = double.tryParse(_feeController.text) ?? 0.01;
     final total = amount + fee;
+    final remaining = (wallet?.balance ?? 0) - total;
     final toAddress = _toController.text.trim();
     final shortAddress = '${toAddress.substring(0, 8)}...${toAddress.substring(toAddress.length - 8)}';
     
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: WarthogColors.primaryOrange.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
+          backgroundColor: const Color(0xFF1A1A1A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: WarthogColors.primaryOrange.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.send,
+                  color: WarthogColors.primaryOrange,
+                  size: 28,
+                ),
               ),
-              child: const Icon(
-                Icons.send,
-                color: WarthogColors.primaryOrange,
-                size: 24,
+              const SizedBox(width: 12),
+              const Text(
+                'Confirm Transaction',
+                style: TextStyle(
+                  color: Colors.white, 
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Divider(color: Color(0xFF2A2A2A), height: 20),
+                
+                // Recipient
+                _buildConfirmRow(
+                  icon: Icons.person_outline,
+                  label: 'Recipient',
+                  value: shortAddress,
+                  valueColor: Colors.white70,
+                ),
+                const SizedBox(height: 16),
+                
+                // Amount
+                _buildConfirmRow(
+                  icon: Icons.attach_money,
+                  label: 'Amount',
+                  value: '$amount WART',
+                  valueColor: WarthogColors.primaryOrange,
+                  highlight: true,
+                ),
+                const SizedBox(height: 16),
+                
+                // Fee
+                _buildConfirmRow(
+                  icon: Icons.local_gas_station,
+                  label: 'Network Fee',
+                  value: '$fee WART',
+                  valueColor: Colors.white70,
+                ),
+                
+                const Divider(color: Color(0xFF2A2A2A), height: 24),
+                
+                // Total
+                _buildConfirmRow(
+                  icon: Icons.summarize,
+                  label: 'Total',
+                  value: '$total WART',
+                  valueColor: Colors.white,
+                  isTotal: true,
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Remaining Balance
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: remaining < 0.01 
+                        ? Colors.red.withOpacity(0.15)
+                        : Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        remaining < 0.01 ? Icons.warning_amber : Icons.account_balance_wallet,
+                        color: remaining < 0.01 ? Colors.red : Colors.green,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Remaining after transaction:',
+                          style: TextStyle(
+                            color: remaining < 0.01 ? Colors.red.shade300 : Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '${remaining.toStringAsFixed(6)} WART',
+                        style: TextStyle(
+                          color: remaining < 0.01 ? Colors.red : Colors.green,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Warning
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline, color: Colors.orange, size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'This transaction cannot be reversed. Please verify the address carefully.',
+                          style: TextStyle(
+                            color: Colors.orange.shade300,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            Expanded(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  backgroundColor: Colors.grey.shade800,
+                ),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 12),
-            const Text(
-              'Confirm Transaction',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _sendTransaction();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: WarthogColors.primaryOrange,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Confirm Send',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Divider(color: Color(0xFF2A2A2A)),
-            _buildConfirmRow('Recipient', shortAddress),
-            const SizedBox(height: 12),
-            _buildConfirmRow('Amount', '$amount WART', highlight: true),
-            const SizedBox(height: 12),
-            _buildConfirmRow('Network Fee', '$fee WART'),
-            const SizedBox(height: 12),
-            _buildConfirmRow('Total', '$total WART', isTotal: true),
-            const Divider(color: Color(0xFF2A2A2A)),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+      ),
+    );
+  }
+  
+  Widget _buildConfirmRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color valueColor,
+    bool highlight = false,
+    bool isTotal = false,
+  }) {
+    return Row(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: (isTotal ? WarthogColors.primaryOrange : Colors.grey.shade800).withOpacity(0.3),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: isTotal ? WarthogColors.primaryOrange : Colors.grey.shade400,
+            size: 18,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isTotal ? Colors.white : Colors.grey.shade400,
+              fontSize: isTotal ? 15 : 14,
+              fontWeight: isTotal ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            color: valueColor,
+            fontWeight: highlight || isTotal ? FontWeight.bold : FontWeight.normal,
+            fontSize: isTotal ? 16 : 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // DIALOG SUKSESI I MADH
+  void _showSuccessNotification(String txId, double amount, double fee, String toAddress) {
+    final shortTxId = '${txId.substring(0, 16)}...${txId.substring(txId.length - 8)}';
+    final shortAddress = '${toAddress.substring(0, 8)}...${toAddress.substring(toAddress.length - 8)}';
+    final total = amount + fee;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
+          backgroundColor: const Color(0xFF1A1A1A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Animacion suksesi
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_circle,
+                  color: Colors.green,
+                  size: 48,
+                ),
               ),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline, color: Colors.orange, size: 16),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'This transaction cannot be reversed. Please verify the address carefully.',
+              const SizedBox(height: 20),
+              const Text(
+                'Transaction Successful!',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Your transaction has been sent to the network',
+                style: TextStyle(
+                  color: Colors.grey.shade400,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2A2A2A),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    _buildDetailRow('Amount', '$amount WART', WarthogColors.primaryOrange),
+                    const SizedBox(height: 8),
+                    _buildDetailRow('Fee', '$fee WART', Colors.white70),
+                    const Divider(color: Color(0xFF3A3A3A), height: 16),
+                    _buildDetailRow('Total', '${total.toStringAsFixed(6)} WART', Colors.white, bold: true),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2A2A2A),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Recipient',
                       style: TextStyle(
-                        color: Colors.orange.shade300,
+                        color: Colors.grey.shade500,
                         fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      shortAddress,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Transaction ID',
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      shortTxId,
+                      style: TextStyle(
+                        color: WarthogColors.primaryOrange,
+                        fontSize: 13,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(context); // Mbyll dialogun
+                        Navigator.pop(context); // Kthehu te HomeScreen
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        backgroundColor: Colors.grey.shade800,
+                      ),
+                      child: const Text(
+                        'Done',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Kopjo TX ID në clipboard
+                        // TODO: Implement clipboard
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Transaction ID copied!'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: WarthogColors.primaryOrange,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Copy TX ID',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _sendTransaction();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: WarthogColors.primaryOrange,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text('Confirm Send'),
-          ),
-        ],
       ),
     );
   }
-  
-  Widget _buildConfirmRow(String label, String value, {bool highlight = false, bool isTotal = false}) {
+
+  Widget _buildDetailRow(String label, String value, Color valueColor, {bool bold = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey.shade400,
+            color: Colors.grey.shade500,
             fontSize: 14,
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            color: isTotal ? WarthogColors.primaryOrange : (highlight ? Colors.white : Colors.white70),
-            fontWeight: isTotal ? FontWeight.bold : (highlight ? FontWeight.w600 : FontWeight.normal),
-            fontSize: isTotal ? 16 : 14,
+            color: valueColor,
+            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            fontSize: 14,
           ),
         ),
       ],
@@ -573,18 +906,25 @@ class _SendScreenState extends State<SendScreen> with SingleTickerProviderStateM
     final amount = double.tryParse(_amountController.text);
     final fee = double.tryParse(_feeController.text) ?? 0.01;
     
+    if (amount == null || amount <= 0) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = '❌ Invalid amount';
+      });
+      return;
+    }
+    
     try {
       final walletService = WalletService();
       final txId = await walletService.sendTransaction(
         toAddress: toAddress,
-        amount: amount!,
+        amount: amount,
         fee: fee,
       );
       
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _successMessage = '✅ Transaction sent!\nTXID: ${txId.substring(0, 16)}...';
         });
         
         // Shto transaksionin në histori
@@ -602,12 +942,18 @@ class _SendScreenState extends State<SendScreen> with SingleTickerProviderStateM
         );
         
         await transactionProvider.addTransaction(newTx);
+        
+        // Zbritja nga balanca
+        final currentBalance = walletProvider.wallet!.balance;
+        final totalSpent = amount + fee;
+        final newBalance = currentBalance - totalSpent;
+        walletProvider.wallet!.balance = newBalance;
+        
+        // Rifresko balancën nga blockchain
         await walletProvider.refreshBalance();
         
-        // Kthehu pas 2 sekondash
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted) Navigator.pop(context);
-        });
+        // 🔥 TREGO DIALOGUN E MADH TË SUKSESIT
+        _showSuccessNotification(txId, amount, fee, toAddress);
       }
       
     } catch (e) {
@@ -616,6 +962,31 @@ class _SendScreenState extends State<SendScreen> with SingleTickerProviderStateM
           _isLoading = false;
           _errorMessage = '❌ ${e.toString().replaceAll('Exception: ', '')}';
         });
+        
+        // SnackBar për gabim
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    e.toString().replaceAll('Exception: ', ''),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red.shade700,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            duration: const Duration(seconds: 4),
+          ),
+        );
       }
     }
   }
