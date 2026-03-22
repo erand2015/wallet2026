@@ -8,7 +8,6 @@ import '../services/api_service.dart';
 import '../services/notification_service.dart';
 import '../models/transaction.dart';
 import '../theme/theme.dart';
-import 'scan_qr_screen.dart';
 import 'dart:developer' as developer;
 
 class SendScreen extends StatefulWidget {
@@ -170,7 +169,7 @@ class _SendScreenState extends State<SendScreen> {
               
               const SizedBox(height: 20),
               
-              // Recipient Address with QR Scanner
+              // Recipient Address
               const Text(
                 'Recipient Address',
                 style: TextStyle(
@@ -180,62 +179,29 @@ class _SendScreenState extends State<SendScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _toController,
-                      style: const TextStyle(color: Colors.white),
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        hintText: 'Enter WART address (48 hex characters)',
-                        hintStyle: TextStyle(color: Colors.grey.shade600),
-                        filled: true,
-                        fillColor: const Color(0xFF1A1A1A),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFF25C05), width: 2),
-                        ),
-                      ),
-                      maxLines: 2,
-                    ),
+              TextField(
+                controller: _toController,
+                style: const TextStyle(color: Colors.white),
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  hintText: 'Enter WART address (48 hex characters)',
+                  hintStyle: TextStyle(color: Colors.grey.shade600),
+                  filled: true,
+                  fillColor: const Color(0xFF1A1A1A),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1A1A1A),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                      onPressed: () async {
-                        final scannedAddress = await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ScanQrScreen()),
-                        );
-                        
-                        if (scannedAddress != null && scannedAddress.toString().isNotEmpty) {
-                          setState(() {
-                            _toController.text = scannedAddress.toString();
-                          });
-                        }
-                      },
-                      icon: const Icon(
-                        Icons.qr_code_scanner,
-                        color: Color(0xFFF25C05),
-                        size: 28,
-                      ),
-                    ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
-                ],
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFF25C05), width: 2),
+                  ),
+                ),
+                maxLines: 2,
               ),
               
               const SizedBox(height: 16),
