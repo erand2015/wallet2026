@@ -39,19 +39,7 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: const Color(0xFF1A1A1A),
         elevation: 0,
         automaticallyImplyLeading: false,
-        title: SizedBox(
-          height: 40,
-          child: Image.asset(
-            'assets/images/warthog_logo.png',
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              return const Text(
-                '🐗',
-                style: TextStyle(fontSize: 28),
-              );
-            },
-          ),
-        ),
+        title: const SizedBox.shrink(),
         centerTitle: true,
       ),
       body: _screens[_currentIndex],
