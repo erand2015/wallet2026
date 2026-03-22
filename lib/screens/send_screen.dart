@@ -101,7 +101,7 @@ class _SendScreenState extends State<SendScreen> with SingleTickerProviderStateM
     }
   }
 
-  // DIALOG KONFIRMIMI PARA DËRGIMIT
+  // DIALOG KONFIRMIMI I PËRMIRËSUAR
   Future<void> _showConfirmDialog() async {
     final walletProvider = Provider.of<WalletProvider>(context, listen: false);
     final wallet = walletProvider.wallet;
@@ -114,9 +114,9 @@ class _SendScreenState extends State<SendScreen> with SingleTickerProviderStateM
     
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: false, // Nuk mbyllet duke klikuar jashtë
       builder: (context) => WillPopScope(
-        onWillPop: () async => false,
+        onWillPop: () async => false, // Nuk mbyllet me back button
         child: AlertDialog(
           backgroundColor: const Color(0xFF1A1A1A),
           shape: RoundedRectangleBorder(
@@ -261,6 +261,7 @@ class _SendScreenState extends State<SendScreen> with SingleTickerProviderStateM
             ),
           ),
           actions: [
+            // Cancel Button - madhësi e barabartë me Confirm
             Expanded(
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -282,6 +283,7 @@ class _SendScreenState extends State<SendScreen> with SingleTickerProviderStateM
               ),
             ),
             const SizedBox(width: 12),
+            // Confirm Button
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
@@ -350,207 +352,6 @@ class _SendScreenState extends State<SendScreen> with SingleTickerProviderStateM
             color: valueColor,
             fontWeight: highlight || isTotal ? FontWeight.bold : FontWeight.normal,
             fontSize: isTotal ? 16 : 14,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // DIALOG SUKSESI I MADH
-  void _showSuccessNotification(String txId, double amount, double fee, String toAddress) {
-    final shortTxId = '${txId.substring(0, 16)}...${txId.substring(txId.length - 8)}';
-    final shortAddress = '${toAddress.substring(0, 8)}...${toAddress.substring(toAddress.length - 8)}';
-    final total = amount + fee;
-    
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false,
-        child: AlertDialog(
-          backgroundColor: const Color(0xFF1A1A1A),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Animacion suksesi
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
-                  size: 48,
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Transaction Successful!',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Your transaction has been sent to the network',
-                style: TextStyle(
-                  color: Colors.grey.shade400,
-                  fontSize: 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2A2A2A),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    _buildDetailRow('Amount', '$amount WART', WarthogColors.primaryOrange),
-                    const SizedBox(height: 8),
-                    _buildDetailRow('Fee', '$fee WART', Colors.white70),
-                    const Divider(color: Color(0xFF3A3A3A), height: 16),
-                    _buildDetailRow('Total', '${total.toStringAsFixed(6)} WART', Colors.white, bold: true),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2A2A2A),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Recipient',
-                      style: TextStyle(
-                        color: Colors.grey.shade500,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      shortAddress,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Transaction ID',
-                      style: TextStyle(
-                        color: Colors.grey.shade500,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      shortTxId,
-                      style: TextStyle(
-                        color: WarthogColors.primaryOrange,
-                        fontSize: 13,
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.pop(context); // Mbyll dialogun
-                        Navigator.pop(context); // Kthehu te HomeScreen
-                      },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        backgroundColor: Colors.grey.shade800,
-                      ),
-                      child: const Text(
-                        'Done',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Kopjo TX ID në clipboard
-                        // TODO: Implement clipboard
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Transaction ID copied!'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: WarthogColors.primaryOrange,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Copy TX ID',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value, Color valueColor, {bool bold = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey.shade500,
-            fontSize: 14,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            color: valueColor,
-            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-            fontSize: 14,
           ),
         ),
       ],
@@ -925,6 +726,7 @@ class _SendScreenState extends State<SendScreen> with SingleTickerProviderStateM
       if (mounted) {
         setState(() {
           _isLoading = false;
+          _successMessage = '✅ Transaction sent!\nTXID: ${txId.substring(0, 16)}...';
         });
         
         // Shto transaksionin në histori
@@ -943,17 +745,19 @@ class _SendScreenState extends State<SendScreen> with SingleTickerProviderStateM
         
         await transactionProvider.addTransaction(newTx);
         
-        // Zbritja nga balanca
+        // 🔥 ZBRITJA NGA SHUMA TOTALE PAS DËRGIMIT
         final currentBalance = walletProvider.wallet!.balance;
         final totalSpent = amount + fee;
         final newBalance = currentBalance - totalSpent;
         walletProvider.wallet!.balance = newBalance;
         
-        // Rifresko balancën nga blockchain
+        // Rifresko balancën nga blockchain për saktësi
         await walletProvider.refreshBalance();
         
-        // 🔥 TREGO DIALOGUN E MADH TË SUKSESIT
-        _showSuccessNotification(txId, amount, fee, toAddress);
+        // Kthehu pas 2 sekondash
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) Navigator.pop(context);
+        });
       }
       
     } catch (e) {
@@ -962,31 +766,6 @@ class _SendScreenState extends State<SendScreen> with SingleTickerProviderStateM
           _isLoading = false;
           _errorMessage = '❌ ${e.toString().replaceAll('Exception: ', '')}';
         });
-        
-        // SnackBar për gabim
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    e.toString().replaceAll('Exception: ', ''),
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.red.shade700,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            duration: const Duration(seconds: 4),
-          ),
-        );
       }
     }
   }
