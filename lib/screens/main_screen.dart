@@ -38,13 +38,15 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1A1A),
         elevation: 0,
-        automaticallyImplyLeading: false, // <- Kjo heq shigjetën Back
-        title: const Text(
-          'Warthog',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
+        automaticallyImplyLeading: false,
+        title: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '🐗',
+              style: TextStyle(fontSize: 28),
+            ),
+          ],
         ),
         centerTitle: true,
       ),
