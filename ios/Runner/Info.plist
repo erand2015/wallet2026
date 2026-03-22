@@ -76,9 +76,11 @@
 	</array>
 	
 	<!-- ========== CAMERA FOR QR CODE ========== -->
-	<!-- Camera permission for QR code scanning -->
+	<!-- Camera permission for QR code scanning (Send) -->
 	<key>NSCameraUsageDescription</key>
-	<string>Warthog Wallet needs camera access to scan QR codes for sending and receiving WART</string>
+	<string>Warthog Wallet needs camera access to scan QR codes for sending WART</string>
+	
+	<!-- Camera permission for QR code (Receive) - already have, keep both -->
 	
 	<!-- ========== NETWORK ========== -->
 	<!-- Allow HTTP connections (for development node) -->
