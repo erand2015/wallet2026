@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'providers/wallet_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'screens/splash_screen.dart';
-import 'screens/main_screen.dart'; // <- Kjo duhet të jetë MainScreen
+import 'screens/main_screen.dart';
 import 'screens/create_wallet_screen.dart';
 import 'screens/import_wallet_screen.dart';
 import 'screens/send_screen.dart';
@@ -43,11 +43,8 @@ class MyApp extends StatelessWidget {
         theme: WarthogTheme.lightTheme,
         darkTheme: WarthogTheme.darkTheme,
         themeMode: ThemeMode.dark,
-        initialRoute: '/splash',
+        home: const SplashScreen(), // <- Përdor home në vend të initialRoute
         routes: {
-          '/splash': (context) => const SplashScreen(),
-          '/': (context) =>
-              const MainScreen(), // <- Kjo duhet të jetë MainScreen
           '/create': (context) => const CreateWalletScreen(),
           '/import': (context) => const ImportWalletScreen(),
           '/send': (context) => const SendScreen(),

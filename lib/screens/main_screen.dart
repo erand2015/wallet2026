@@ -35,6 +35,19 @@ class _MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1A1A1A),
+        elevation: 0,
+        automaticallyImplyLeading: false, // <- Kjo heq shigjetën Back
+        title: const Text(
+          'Warthog',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: _screens[_currentIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
