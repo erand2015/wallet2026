@@ -14,7 +14,7 @@ dependencies:
   flutter_local_notifications: ^16.3.0
   timezone: ^0.9.4
   permission_handler: ^11.0.0
-  mobile_scanner: ^6.0.0
+
   
   # Kripto dhe wallet
   bip39: ^1.0.6
